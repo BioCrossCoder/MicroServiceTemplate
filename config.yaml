@@ -1,0 +1,7 @@
+self:
+  host: localhost
+  port: 8080
+  language: zh_cn
+dependency:
+  authorization_endpoint: http://authorization-private.svc.cluster.local:4445
+  user_management_endpoint: http://user-management-private.svc.cluster.local:30980
