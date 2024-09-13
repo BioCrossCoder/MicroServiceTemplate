@@ -1,6 +1,7 @@
 self:
   host: localhost
-  port: 8080
+  public_port: 8080
+  private_port: 8081
   language: zh_cn
 dependency:
   authorization_endpoint: http://authorization-private.svc.cluster.local:4445

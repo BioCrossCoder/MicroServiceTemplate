@@ -34,9 +34,12 @@ type router struct {
 func NewRouter() Router {
 	rOnce.Do(func() {
 		r = &router{
-			publicControllers: []PublicController{},
+			publicControllers: []PublicController{
+				newAppController(),
+			},
 			privateControllers: []PrivateController{
 				newHealthController(),
+				newAppController(),
 			},
 		}
 	})
@@ -44,7 +47,6 @@ func NewRouter() Router {
 }
 
 func (r *router) RegisterPrivateAPI(group *gin.RouterGroup) {
-	group.Use()
 	for _, ctrl := range r.privateControllers {
 		ctrl.RegisterPrivate(group)
 	}

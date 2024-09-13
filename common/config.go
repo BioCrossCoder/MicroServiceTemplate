@@ -3,9 +3,10 @@ package common
 import "github.com/spf13/viper"
 
 type selfConfig struct {
-	Host     string `yaml:"host"`
-	Port     uint16 `yaml:"port"`
-	Language string `yaml:"language"`
+	Host        string `yaml:"host"`
+	PublicPort  uint16 `yaml:"public_port"`
+	PrivatePort uint16 `yaml:"private_port"`
+	Language    string `yaml:"language"`
 }
 
 type dependencyConfig struct {
