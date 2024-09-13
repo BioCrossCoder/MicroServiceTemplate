@@ -24,7 +24,7 @@ const (
 	UserRole_NormalUser = 1 << iota
 	UserRole_AppAdmin
 	UserRole_SystemAdmin
-	UserRole_SuperAdmin = UserRole_AppAdmin | UserRole_SystemAdmin
+	UserRole_SuperAdmin
 )
 
 const (

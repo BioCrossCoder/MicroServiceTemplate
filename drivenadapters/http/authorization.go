@@ -18,7 +18,7 @@ type authorizationClient struct {
 	httpClient infra.HttpClient
 }
 
-func NewAuthorizationClient(httpClient infra.HttpClient) AuthorizationClient {
+func NewAuthorizationClient() AuthorizationClient {
 	authOnce.Do(func() {
 		auth = &authorizationClient{
 			httpClient: infra.NewHttpClient(),
@@ -33,7 +33,7 @@ func (c *authorizationClient) ParseToken(token string) (info *TokenInfo, err err
 }
 
 type TokenInfo struct {
-	UserID    string   `json:"user_id"`
-	UserName  string   `json:"user_name"`
-	UserRoles []string `json:"user_roles"`
+	UserID    string `json:"user_id"`
+	UserName  string `json:"user_name"`
+	UserRoles []int  `json:"user_roles"`
 }
