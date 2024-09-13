@@ -11,6 +11,7 @@ const (
 	User         = "user"
 	Department   = "department"
 	UserGroup    = "group"
+	Channel      = "demo_service"
 )
 
 var (

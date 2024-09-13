@@ -29,7 +29,7 @@ var (
 	consumerOnce sync.Once
 )
 
-func NewKafkaConsumerClient(topic string) *kafka.Consumer {
+func NewKafkaConsumerClient() *kafka.Consumer {
 	consumerOnce.Do(func() {
 		var err error
 		mqConsumer, err = kafka.NewConsumer(&kafka.ConfigMap{
