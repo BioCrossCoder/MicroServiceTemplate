@@ -1,11 +1,10 @@
 package mq
 
 import (
+	"encoding/json"
 	"main/common"
 	"main/infra"
 	"sync"
-
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 type UserManagementBroker interface {
@@ -20,7 +19,7 @@ var (
 )
 
 type userManagementBroker struct {
-	consumer *kafka.Consumer
+	consumer infra.MQConsumer
 	cg       common.ChannelGenerator
 }
 
@@ -34,24 +33,36 @@ func NewUserManagementBroker() UserManagementBroker {
 	return umb
 }
 
+func (b *userManagementBroker) handleObjectIDMsg(topic, channel string, handler func(*ObjectIDMsg) error) {
+	b.consumer.Subscribe(topic, channel, func(msg []byte) (err error) {
+		value := new(ObjectIDMsg)
+		err = json.Unmarshal(msg, value)
+		if err != nil {
+			return
+		}
+		err = handler(value)
+		return
+	})
+}
+
 func (b *userManagementBroker) HandleUserDelete(handler func(*ObjectIDMsg) error) {
-	// topic := "user.delete"
-	// channel := b.cg.nextchannel(topic)
-	// ...
+	topic := "user.delete"
+	channel := b.cg.NextChannel(topic)
+	go b.handleObjectIDMsg(topic, channel, handler)
 	return
 }
 
 func (b *userManagementBroker) HandleDepartmentDelete(handler func(*ObjectIDMsg) error) {
-	// topic := "dept.delete"
-	// channel := b.cg.nextchannel(topic)
-	// ...
+	topic := "dept.delete"
+	channel := b.cg.NextChannel(topic)
+	go b.handleObjectIDMsg(topic, channel, handler)
 	return
 }
 
 func (b *userManagementBroker) HandleUserGroupDelete(handler func(*ObjectIDMsg) error) {
-	// topic := "group.delete"
-	// channel := b.cg.nextchannel(topic)
-	// ...
+	topic := "group.delete"
+	channel := b.cg.NextChannel(topic)
+	go b.handleObjectIDMsg(topic, channel, handler)
 	return
 }
 

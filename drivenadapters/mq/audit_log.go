@@ -1,11 +1,10 @@
 package mq
 
 import (
+	"encoding/json"
 	"main/infra"
 	"main/models"
 	"sync"
-
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 type AuditLogBroker interface {
@@ -18,7 +17,7 @@ var (
 )
 
 type auditLogBroker struct {
-	producer *kafka.Producer
+	producer infra.MQProducer
 }
 
 func NewAuditLogBroker() AuditLogBroker {
@@ -31,6 +30,11 @@ func NewAuditLogBroker() AuditLogBroker {
 }
 
 func (b *auditLogBroker) SendLog(logBody *models.AuditLog) (err error) {
-	// topic := "audit_log.log_management"
+	topic := "audit_log.log_management"
+	msg, err := json.Marshal(logBody)
+	if err != nil {
+		return
+	}
+	err = b.producer.Publish(topic, msg)
 	return
 }

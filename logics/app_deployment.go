@@ -3,6 +3,8 @@ package logics
 import (
 	"main/common"
 	"main/logics/dependency"
+	"main/logics/pipeline"
+	"main/models"
 	"sync"
 )
 
@@ -21,6 +23,7 @@ var (
 type appDeploymentService struct {
 	repo      dependency.AppDeploymentRepo
 	eventLoop common.EventLoop
+	pipeline  pipeline.AppDeploymentPipeline
 }
 
 func NewAppDeploymentService() AppDeploymentService {
@@ -28,6 +31,7 @@ func NewAppDeploymentService() AppDeploymentService {
 		adSvc = &appDeploymentService{
 			repo:      dependency.GetAppDeploymentRepo(),
 			eventLoop: common.GetEventLoop(common.Channel),
+			pipeline:  pipeline.NewAppDeploymentPipeline(),
 		}
 	})
 	return adSvc
@@ -45,7 +49,12 @@ func (s *appDeploymentService) UninstallApp(appName string) (err error) {
 
 func (s *appDeploymentService) ClearInvalidApps() (err error) {
 	// ...
-	// s.eventLoop.Trigger("clear_app", []uint64{1, 2, 3})
+	invalidAppIDs := []uint64{1, 2, 3}
+	s.eventLoop.Trigger("clear_app", invalidAppIDs)
+	msg := &models.AppIDsMsg{
+		AppIDs: invalidAppIDs,
+	}
+	err = s.pipeline.SendClearAppMessage(msg)
 	return
 }
 
