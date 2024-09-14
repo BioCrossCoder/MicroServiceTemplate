@@ -39,3 +39,7 @@ const (
 	OpType_DELETE
 	OpType_EDIT
 )
+
+const (
+	TOPIC_CLEAR_APP = "clear_app"
+)

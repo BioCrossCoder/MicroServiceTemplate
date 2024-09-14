@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	_ "main/drivenadapters/repository"
-	_ "main/driveradapters/async"
 	"main/driveradapters/cmd"
 	"os"
 )

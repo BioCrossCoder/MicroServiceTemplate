@@ -3,7 +3,6 @@ package logics
 import (
 	"main/common"
 	"main/logics/dependency"
-	"main/logics/pipeline"
 	"main/logics/proxy"
 	"main/models"
 	"sync"
@@ -26,7 +25,6 @@ var (
 type appManagementService struct {
 	repo      dependency.AppManagementRepo
 	eventLoop common.EventLoop
-	pipeline  pipeline.AppManagementPipeline
 }
 
 func NewAppManagementService() AppManagementService {
@@ -34,7 +32,6 @@ func NewAppManagementService() AppManagementService {
 		svc := &appManagementService{
 			repo:      dependency.GetAppManagementRepo(),
 			eventLoop: common.GetEventLoop(common.Channel),
-			pipeline:  pipeline.NewAppManagementPipeline(),
 		}
 		svc.init()
 		amSvc = svc
@@ -47,15 +44,6 @@ func (s *appManagementService) init() {
 	s.eventLoop.AddListener("clear_app", func(payload any) (err error) {
 		for _, key := range payload.([]uint64) {
 			err = s.CancelApp(&models.DeleteAppByIdReqVO{ID: int(key)})
-			if err != nil {
-				return
-			}
-		}
-		return
-	})
-	s.pipeline.HandleClearAppMessage(func(msg *models.AppIDsMsg) (err error) {
-		for _, appID := range msg.AppIDs {
-			err = s.CancelApp(&models.DeleteAppByIdReqVO{ID: int(appID)})
 			if err != nil {
 				return
 			}

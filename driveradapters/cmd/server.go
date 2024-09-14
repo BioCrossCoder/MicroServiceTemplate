@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"main/common"
 	"main/driveradapters/api"
+	"main/driveradapters/async"
 	"strings"
 	"sync"
 
@@ -12,8 +13,9 @@ import (
 )
 
 type serverExecutor struct {
-	rootCmd *cobra.Command
-	router  api.Router
+	rootCmd    *cobra.Command
+	router     api.Router
+	msgGateway async.MessageGateway
 }
 
 var (
@@ -28,7 +30,8 @@ func newServerExecutor() CommandExecutor {
 				Use:   "server",
 				Short: "Run the server",
 			},
-			router: api.NewRouter(),
+			router:     api.NewRouter(),
+			msgGateway: async.NewMessageGateway(),
 		}
 		executor.rootCmd.Run = func(cmd *cobra.Command, args []string) {
 			executor.runServer()
@@ -54,30 +57,35 @@ func (e *serverExecutor) createServer(pathPrefix string) *gin.Engine {
 	return server
 }
 
+func (e *serverExecutor) listenPrivateAPI() {
+	apiPrefix := "/api/demo/v1"
+	server := e.createServer(apiPrefix)
+	group := server.Group(apiPrefix)
+	e.router.RegisterPrivateAPI(group)
+	addr := fmt.Sprintf("%v:%v", common.SelfConfig.Host, common.SelfConfig.PrivatePort)
+	err := server.Run(addr)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (e *serverExecutor) listenPublicAPI() {
+	apiPrefix := "/api/demo/v1"
+	server := e.createServer(apiPrefix)
+	group := server.Group(apiPrefix)
+	e.router.RegisterPublicAPI(group)
+	addr := fmt.Sprintf("%v:%v", common.SelfConfig.Host, common.SelfConfig.PublicPort)
+	err := server.Run(addr)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (e *serverExecutor) runServer() {
 	gin.SetMode(gin.ReleaseMode)
-	go func() {
-		apiPrefix := "/api/demo/v1"
-		server := e.createServer(apiPrefix)
-		group := server.Group(apiPrefix)
-		e.router.RegisterPublicAPI(group)
-		addr := fmt.Sprintf("%v:%v", common.SelfConfig.Host, common.SelfConfig.PublicPort)
-		err := server.Run(addr)
-		if err != nil {
-			panic(err)
-		}
-	}()
-	go func() {
-		apiPrefix := "/api/demo/v1"
-		server := e.createServer(apiPrefix)
-		group := server.Group(apiPrefix)
-		e.router.RegisterPrivateAPI(group)
-		addr := fmt.Sprintf("%v:%v", common.SelfConfig.Host, common.SelfConfig.PrivatePort)
-		err := server.Run(addr)
-		if err != nil {
-			panic(err)
-		}
-	}()
-	for {
-	}
+	go e.listenPrivateAPI()
+	go e.listenPublicAPI()
+	e.msgGateway.RegisterPublishAPI()
+	e.msgGateway.RegisterSubscribeAPI()
+	select {}
 }

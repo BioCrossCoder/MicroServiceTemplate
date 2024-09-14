@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"main/common"
 	"main/models"
 	"sync"
 )
@@ -24,5 +25,5 @@ func NewAppDeploymentPipeline() AppDeploymentPipeline {
 }
 
 func (p *appDeploymentPipeline) SendClearAppMessage(msg *models.AppIDsMsg) (err error) {
-	return cams(msg)
+	return senders[common.TOPIC_CLEAR_APP].(clearAppMessageSender)(msg)
 }
