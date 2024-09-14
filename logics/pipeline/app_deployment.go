@@ -25,5 +25,5 @@ func NewAppDeploymentPipeline() AppDeploymentPipeline {
 }
 
 func (p *appDeploymentPipeline) SendClearAppMessage(msg *models.AppIDsMsg) (err error) {
-	return senders[common.TOPIC_CLEAR_APP].(clearAppMessageSender)(msg)
+	return sendMessage(common.TOPIC_CLEAR_APP, msg)
 }
